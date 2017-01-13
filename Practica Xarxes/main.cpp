@@ -12,12 +12,24 @@ using namespace std;
 std::thread;
 mutex perma;
 
-#define ARRIBA     72      // CONSTANTS AMB LES FLETXES DEL TECLAT
-#define IZQUIERDA  75
-#define DERECHA    77
-#define ABAJO      80
-#define ESC        27
-#define ENTER      13
+//					CONSTANTES PARA LAS FLECHAS DEL TECLADO + WASD + ESC + ENTER
+#define ARRIBA		72
+#define IZQUIERDA	75
+#define DERECHA		77
+#define ABAJO       80
+#define W			80
+#define A			80
+#define S			80
+#define D			80
+#define ESC			27
+#define ENTER       13
+
+//					CONSTANTES PARA EL MENÚ PRINCIPAL
+#define NUM_1		48
+#define NUM_2		50
+#define NUM_3		51
+#define NUM_4		52
+#define NUM_5		53
 
 int backcolor = 0;
 int dir = 0;
@@ -96,6 +108,53 @@ char mapa[50][100] = {
 	"                  DXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXC",
 };
 
+char menu[70][100] = {
+	                                                                         
+	"_|_|_|      _|_|      _|_|_|          _|      _|    _|_|    _|      _|",
+	"_|    _|  _|    _|  _|                _|_|  _|_|  _|    _|  _|_|    _|",
+	"_|_|_|    _|_|_|_|  _|      _|_|_|_|  _|  _|  _|  _|_|_|_|  _|  _|  _|",
+ 	"_|        _|    _|  _|                _|      _|  _|    _|  _|    _|_|",
+	"_|        _|    _|    _|_|_|          _|      _|  _|    _|  _|      _|",
+	"                                                                      ",
+	"                                                                      ",
+	"                          - SELECT AN OPTION -                        ",
+	"                                                                      ",
+	"                                                                      ",
+	"   ================================================================   ",
+	"   ===                        1. Play Game                      ===   ",
+	"   ================================================================   ",
+	"                                                                      ",
+	"   ================================================================   ",
+	"   ===                       2. View Ranking                    ===   ",
+	"   ================================================================   ",
+	"                                                                      ",
+	"   ================================================================   ",
+	"   ===                 3. View Player's Highscores              ===   ",
+	"   ================================================================   ",
+	"                                                                      ",
+	"   ================================================================   ",
+	"   ===                    4. View Achievements                  ===   ",
+	"   ================================================================   ",
+	"                                                                      ",
+	"   ================================================================   ",
+	"   ===                        5. Exit Game                      ===   ",
+	"   ================================================================   ",
+	"                                                                      ",
+	"                                                                      "
+};
+
+char rankingTitle[70][100] = {                                                    
+ "_|_|_|      _|_|    _|      _|  _|    _|  _|_|_|  _|      _|    _|_|_|  ",
+ "_|    _|  _|    _|  _|_|    _|  _|  _|      _|    _|_|    _|  _|        ",
+ "_|_|_|    _|_|_|_|  _|  _|  _|  _|_|        _|    _|  _|  _|  _|  _|_|  ",
+ "_|    _|  _|    _|  _|    _|_|  _|  _|      _|    _|    _|_|  _|    _|  ",
+ "_|    _|  _|    _|  _|      _|  _|    _|  _|_|_|  _|      _|    _|_|_|  "
+};
+
+//  ! Impresión de los jugadores en el ranking (IDEA)
+//    printf("                              1. %s",rankingName); ---> para printear los jugadores del ranking (rankingName(string) delante del numero), los espacios "centran" al nombre del jugador)
+
+
 
 void pintar_mapa()// Funcio que imprimeix el mapa basant-se en el mapa codificat
 {
@@ -131,8 +190,6 @@ void pintar_mapa()// Funcio que imprimeix el mapa basant-se en el mapa codificat
 				setCColor(color[0]);
 				printf("%c", 200);
 			}
-
-
 		}
 	}
 }
@@ -141,7 +198,7 @@ void Input() {
 	if (_kbhit()) {						//Si hay un input:
 		char tecla = _getch();			//Se mira que valor de la tecla corresponde.
 		switch (tecla) {
-		case ARRIBA:
+		case ARRIBA || ESC:
 			dir = 0;
 			break;
 
@@ -158,7 +215,6 @@ void Input() {
 			break;
 		}
 	}
-
 }
 
 
