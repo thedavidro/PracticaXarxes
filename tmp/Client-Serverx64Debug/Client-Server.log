@@ -1,0 +1,4 @@
+﻿  Pacman.cpp
+c:\users\davidro\documents\visual studio 2015\projects\practicaxarxes\src\server_client\client-server\pacman.cpp(558): warning C4477: 'scanf' : la cadena de formato '%s' requiere un argumento de tipo 'char *', pero el argumento variádico 1 tiene el tipo 'std::string'
+  Client-Server.vcxproj -> C:\Users\Davidro\Documents\Visual Studio 2015\Projects\PracticaXarxes\\bin\x64Debug\Client-Server.exe
+  Client-Server.vcxproj -> C:\Users\Davidro\Documents\Visual Studio 2015\Projects\PracticaXarxes\\bin\x64Debug\Client-Server.pdb (Full PDB)

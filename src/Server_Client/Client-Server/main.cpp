@@ -1,4 +1,4 @@
-#include "XML.hpp"
+/*#include "XML.hpp"
 
 
 using namespace std;
@@ -9,4 +9,4 @@ void main() {
 
 
 	//cout << "hello" << endl;
-}
+}*/

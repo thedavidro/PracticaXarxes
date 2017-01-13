@@ -5,6 +5,7 @@
 #include <mutex>
 #include <thread>
 #include <chrono>
+#include <ctime> // para contar el tiempo
 //#include <stdlib.h>
 
 using namespace std;
@@ -22,6 +23,8 @@ mutex perma;
 // VARIABLES MENU
 char chooseOption;
 bool error = false;
+bool addScore = false;
+string username;
 
 int backcolor = 0;
 int dir = 0;
@@ -31,6 +34,9 @@ int anteriorpx, anteriorpy;
 long int punts = 0;
 int vides = 3;
 int metas = 1;
+clock_t tiempoInicial;
+clock_t tiempoFinal;
+double tiempoTotal;
 
 void setCColor(int color)
 {
@@ -41,14 +47,16 @@ void setCColor(int color)
 	SetConsoleTextAttribute(hConsole, color | (backcolor * 0x10 + 0x100));
 }
 
-int color[7] = {
+// setCColor(color[6]); ---> COLOR BLANCO
+int color[8] = {
 	0x009,
 	0x00E,
 	0x00C,
 	0x002,
 	0x00B,
 	0x005,
-	0x00F
+	0x00F,
+	0 // negro
 };
 
 struct fantasma {
@@ -68,6 +76,38 @@ void gotoxy(int x, int y)  // funcio que posiciona el cursor a la coordenada (x,
 }
 
 char mapa[50][100] = {
+	"                                                      ",
+	"                  AXXXXXXXXXXXXXXXXXXXB AXXXXXXXXXXXXXXXXXXXB",
+	"                  Y___________________Y Y___________________Y",
+	"                  Y_AXXXXXB_AXXXXXXXB_Y Y_AXXXXXXXB_AXXXXXB_Y",
+	"                  Y_Y     Y_Y       Y_Y Y_Y       Y_Y     Y_Y",
+	"                  Y_DXXXXXC_DXXXXXXXC_DXC_DXXXXXXXC_DXXXXXC_Y",
+	"                  Y________|_________|___|_________|________Y",
+	"                  Y_AXXXXXB_AXB_AXXXXXXXXXXXXXB_AXB_AXXXXXB_Y",
+	"                  Y_DXXXXXC_Y Y_DXXXXB   AXXXXC_Y Y_DXXXXXC_Y",
+	"                  Y_________Y Y______Y   Y______Y Y_________Y",
+	"                  DXXXXXXXB_Y DXXXXB_Y   Y_AXXXXC Y_AXXXXXXXC",
+	"                          Y_Y AXXXXC_DXXXC_DXXXXB Y_Y        ",
+	"                          Y_Y Y_________________Y Y_Y        ",
+	"                  XXXXXXXXC_DXC_AXXXXXX XXXXXXB_DXC_DXXXXXXXX",
+	"                  P________|____Y      *      Y____|________P",
+	"                  XXXXXXXXB_AXB_DXXXXXXXXXXXXXC_AXB_AXXXXXXXX",
+	"                          Y_Y Y_________________Y Y_Y        ",
+	"                          Y_Y Y_AXXXXXXXXXXXXXB_Y Y_Y        ",
+	"                  AXXXXXXXC_DXC_DXXXXB   AXXXXC_DXC_DXXXXXXXB",
+	"                  Y________|_________Y   Y_________|________Y",
+	"                  Y_AXXXXXB_AXXXXXXB_Y   Y_AXXXXXXB_AXXXXXB_Y",
+	"                  Y_DXXXB Y_DXXXXXXC_DXXXC_DXXXXXXC_Y AXXXC_Y",
+	"                  Y_____Y Y_________|_____|_________Y Y_____Y",
+	"                  DXXXB_Y Y_AXB_AXXXXXXXXXXXXXB_AXB_Y Y_AXXXC",
+	"                  AXXXC_DXC_Y Y_DXXXXB   AXXXXC_Y Y_DXC_DXXXB",
+	"                  Y_________Y Y______Y   Y______Y Y_________Y",
+	"                  Y_AXXXXXXXC DXXXXB_Y   Y_AXXXXC DXXXXXXXB_Y",
+	"                  Y_DXXXXXXXXXXXXXXC_DXXXC_DXXXXXXXXXXXXXXC_Y",
+	"                  Y_________________|_____|_________________Y",
+	"                  DXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXC",
+};
+char mapa_save[50][100] = {
 	"                                                      ",
 	"                  AXXXXXXXXXXXXXXXXXXXB AXXXXXXXXXXXXXXXXXXXB",
 	"                  Y___________________Y Y___________________Y",
@@ -496,37 +536,50 @@ void marcador() {
 
 int main() {
 	for (;;) {
+		setCColor(color[1]);
 		for (int i = 0; i < 31; i++) {
 			for (int j = 0; j < 70; j++) {
+				if (i == 7) { setCColor(color[6]); }
 				if (error) {
+					if(i == 8) { setCColor(color[2]); }
 					printf("%c", menu[i][j]);
+					if (i == 10) { setCColor(color[6]); }
 				} else if(!error){
 					if(i == 9) { }
 					if(i != 8) { printf("%c", menu[i][j]); }
 				}
 			}
-			printf("\n");
+			printf("\n\n");
+		}
+		if (addScore) {
+			setCColor(color[1]);
+			tiempoTotal = double(tiempoFinal - tiempoInicial) / CLOCKS_PER_SEC;
+			printf("           Score: %d - Seconds: %.0lf - Insert your name: ", punts, tiempoTotal);
+			scanf("%s", username);
+			// Vainas para enchufar nombre + tiempo + score a XML
+			addScore = false;
 		}
 		gotoxy(0, 0);
 		chooseOption = _getch();
 		switch (chooseOption) {
 		
 		case '1': // JUGAR
+			for (int i = 0; i < 78; i++) {
+				for (int j = 0; j < 30; j++) {
+					mapa[j][i] = mapa_save[j][i];
+				}
+			}
 			system("cls"); // Limpia la pantalla una vez se ha escogido
+			vides = 3;
 			error = false;
 			fantasma ghostA = inicialitzarFantasma(41, 14, 2);
 			fantasma ghostB = inicialitzarFantasma(43, 14, 3);
 			fantasma ghostC = inicialitzarFantasma(40, 14, 4);
 			fantasma ghostD = inicialitzarFantasma(39, 14, 5);
 
+			tiempoInicial = clock();
 			pintar_mapa();
-			/*
-			//SPAWNEAR FANTASMAS:
-			thread esperaFantasma(ordenFantasmas, 4);
-			esperaFantasma.join();
-			*/
 			while (vides > 0 && punts < 1940) {
-				//marcador();					//CONVERTIR EN UN THREAD APARTE
 				thread(marcador).join();
 
 				moureFantasma(ghostA);
@@ -535,33 +588,35 @@ int main() {
 				moureFantasma(ghostD);
 
 				moverPacman();
-				//TODO Moure el Pacman, els fantasmes i detectar els possibles xocs
 
 				Sleep(110);
 			}
-
-
-
 
 			for (int i = 0; i <= vides; i++) {
 				gotoxy(5, i + 27);
 				printf(" ");
 			}
+			tiempoFinal = clock();
+			system("cls");
+			addScore = true;
 			break;
 
 		case '2': // RANKING
 			error = false;
 
+			system("cls");
 			break;
 
 		case '3':	// HIGHSCORES
 			error = false;
 
+			system("cls");
 			break;
 
 		case '4': // ACHIEVEMENTS
 			error = false;
 
+			system("cls");
 			break;
 
 		case '5': // EXIT

@@ -1,64 +1,72 @@
+/*#define WIN32_LEAN_AND_MEAN
+#define DEFAULT_BUFLEN 512
 #include <Windows.h>
 #include <WS2tcpip.h>
-#include <WinSock2.h>
-#include <stdio.h>
 #include <stdlib.h>
-
-
+#include <stdio.h>
+#include <iostream>
+#include <WinSock2.h>
 #pragma comment(lib, "Ws2_32.lib")
 
 
-int client(int argc, char *argv[]) {
+void client() {
+
 	WSAData wsaData;
+	WSAStartup(MAKEWORD(2, 2), &wsaData);
 	struct addrinfo addrInit;
 	struct addrinfo *addrDest;
+	ZeroMemory(&addrInit, sizeof(addrInit));
 
 	addrInit.ai_family = AF_INET;
 	addrInit.ai_socktype = SOCK_STREAM;
 	addrInit.ai_protocol = IPPROTO_TCP;
 
+	getaddrinfo("192.168.123.76", "8155", &addrInit, &addrDest); //Ip servidor (a qui li enviem)
 
-	getaddrinfo("192.168.123.9", "5260", &addrInit, &addrDest);
 
+	SOCKET Socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	connect(Socket, addrDest->ai_addr, addrDest->ai_addrlen);
+	const char *message = "Sloth";
+	send(Socket, message, DEFAULT_BUFLEN, sizeof(message));
+	shutdown(Socket, 1);
+	closesocket(Socket);
+	WSACleanup();
+}
+
+void server() {
+	WSAData wsaData;
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
 
-	SOCKET my_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	connect(my_socket, addrDest->ai_addr, addrDest->ai_addrlen);
-
-
-
-
-
-
-
-
-
-	shutdown(my_socket, 1);
-	closesocket(my_socket);
-	WSACleanup();
-
-	return 0;
-}
-
-int server() {
 	struct addrinfo addrInit;
 	struct addrinfo *addrDest;
-	struct addrinfo *addrEmpty;
 
+	ZeroMemory(&addrInit, sizeof(addrInit));
 	addrInit.ai_family = AF_INET;
 	addrInit.ai_socktype = SOCK_STREAM;
 	addrInit.ai_protocol = IPPROTO_TCP;
+	addrInit.ai_protocol = AI_PASSIVE;
 
-	getaddrinfo("127.0.0.1", "5260", &addrInit, &addrDest);
+	getaddrinfo(NULL, "8155", &addrInit, &addrDest);
 
-	SOCKET my_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	bind(my_socket, addrDest->ai_addr, addrDest->ai_addrlen);
-	listen(my_socket, 1); //socket + # de conexiones permitidas
-	accept(my_socket, addrEmpty->ai_addr, NULL);
-	char *buf;
-	recv(my_socket, buf, sizeof(*buf), 1);
+	char recvbuf[DEFAULT_BUFLEN];
+	int recbuflen = DEFAULT_BUFLEN;
 
-	shutdown(my_socket, 1);
-	closesocket(my_socket);
+	SOCKET connectSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	bind(connectSocket, addrDest->ai_addr, addrDest->ai_addrlen);
+	listen(connectSocket, 1); //socket + # de conexiones permitidas
+	SOCKET reciveSocket = accept(connectSocket, addrDest->ai_addr, NULL);
+	int pos = recv(reciveSocket, recvbuf, recbuflen, 0);
+	recvbuf[pos - 1] = '\0';
+	std::cout << recvbuf << std::endl;
+	shutdown(reciveSocket, SD_RECEIVE);
+	closesocket(reciveSocket);
 	WSACleanup();
 }
+
+void main() {
+	for (;;) {
+		server();
+	}
+	//client();
+}
+*/
