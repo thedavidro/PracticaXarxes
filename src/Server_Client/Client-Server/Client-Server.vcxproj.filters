@@ -27,6 +27,9 @@
     <ClCompile Include="Enlace.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CLIENT.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BinaryConversion.hpp">
@@ -40,6 +43,9 @@
     </ClInclude>
     <ClInclude Include="XML.hpp">
       <Filter>Source Files\XML</Filter>
+    </ClInclude>
+    <ClInclude Include="CLIENT.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,14 +1,16 @@
-﻿#include <windows.h>
-#include <iostream>
-#include <conio.h>
+﻿#include <conio.h>
 #include <stdio.h>
+// Para el uso de threads
 #include <mutex>
 #include <thread>
 #include <chrono>
-#include <ctime> // para contar el tiempo
+// Para contar el tiempo
+#include <ctime>
 //#include <stdlib.h>
+// Cliente
+#include "CLIENT.h"
 
-using namespace std;
+//using namespace std;
 std::thread;
 mutex perma;
 
@@ -24,7 +26,6 @@ mutex perma;
 char chooseOption;
 bool error = false;
 bool addScore = false;
-string username;
 
 int backcolor = 0;
 int dir = 0;
@@ -37,6 +38,15 @@ int metas = 1;
 clock_t tiempoInicial;
 clock_t tiempoFinal;
 double tiempoTotal;
+
+string stringScore;
+string score_xml;
+string name_xml;
+char achievements[5];
+string achievements_xml;
+bool played = false;
+
+bool beated[5];
 
 void setCColor(int color)
 {
@@ -141,7 +151,7 @@ char mapa_save[50][100] = {
 };
 
 char menu[70][100] = {
-	                                                                         
+	"                                                                      ",
 	"_|_|_|      _|_|      _|_|_|          _|      _|    _|_|    _|      _|",
 	"_|    _|  _|    _|  _|                _|_|  _|_|  _|    _|  _|_|    _|",
 	"_|_|_|    _|_|_|_|  _|      _|_|_|_|  _|  _|  _|  _|_|_|_|  _|  _|  _|",
@@ -161,7 +171,7 @@ char menu[70][100] = {
 	"   ================================================================   ",
 	"                                                                      ",
 	"   ================================================================   ",
-	"   ===                3. View Player's Highscores               ===   ",
+	"   ===                3. View Player's Highscore                ===   ",
 	"   ================================================================   ",
 	"                                                                      ",
 	"   ================================================================   ",
@@ -175,12 +185,108 @@ char menu[70][100] = {
 	"                                                                      "
 };
 
-char rankingTitle[70][100] = {                                                    
- "_|_|_|      _|_|    _|      _|  _|    _|  _|_|_|  _|      _|    _|_|_|  ",
- "_|    _|  _|    _|  _|_|    _|  _|  _|      _|    _|_|    _|  _|        ",
- "_|_|_|    _|_|_|_|  _|  _|  _|  _|_|        _|    _|  _|  _|  _|  _|_|  ",
- "_|    _|  _|    _|  _|    _|_|  _|  _|      _|    _|    _|_|  _|    _|  ",
- "_|    _|  _|    _|  _|      _|  _|    _|  _|_|_|  _|      _|    _|_|_|  "
+char highscoresMenu[70][100] = {
+	"                                                                      ",
+	"_|_|_|      _|_|      _|_|_|          _|      _|    _|_|    _|      _|",
+	"_|    _|  _|    _|  _|                _|_|  _|_|  _|    _|  _|_|    _|",
+	"_|_|_|    _|_|_|_|  _|      _|_|_|_|  _|  _|  _|  _|_|_|_|  _|  _|  _|",
+	"_|        _|    _|  _|                _|      _|  _|    _|  _|    _|_|",
+	"_|        _|    _|    _|_|_|          _|      _|  _|    _|  _|      _|",
+	"                                                                      ",
+	"                                                                      ",
+	"                             - HIGHSCORES -                           ",
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                   Your highscore:                                    ", //16,36
+	"                                                                      ",
+	"                Your last highscore:                                  ", //18,38
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                      ============================                    ", //30
+	"                          Press ESC to return                         "
+};
+
+char rankingMenu[70][100] = { // (31,71)
+	"                                                                      ",
+	"                                                                      ",
+	"                          ===================                         ", //3
+	"                          ===   RANKING   ===                         ",
+	"                          ===================                         ",
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ", //12
+	"                                                                      ",
+	"                                                                      ", //14
+	"                                                                      ",
+	"                                                                      ", //16
+	"                                                                      ",
+	"                                                                      ", //18
+	"                                                                      ",
+	"                                                                      ", //20
+	"                                                                      ",
+	"                                                                      ", //22
+	"                                                                      ",
+	"                                                                      ", //24
+	"                                                                      ",
+	"                                                                      ", //26
+	"                                                                      ",
+	"                                                                      ", //28
+	"                                                                      ",
+	"                                                                      ", //30
+	"                      ============================                    ",
+	"                          Press ESC to return                         "
+};
+
+char achievementsMenu[70][100] = { // (31,71)
+	"                                                                      ",
+	"                                                                      ",
+	"                        ========================                      ", //3
+	"                        ===   ACHIEVEMENTS   ===                      ",
+	"                        ========================                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                          1. Die with 0 points                        ", //12
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                          2. Reach 500 points                         ", //16
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                          3. Reach 1000 points                        ", //20
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                         4. Survive 30 seconds                        ", //24
+	"                                                                      ",
+	"                                                                      ",
+	"                                                                      ",
+	"                         5. Survive 60 seconds                        ", //28
+	"                                                                      ",
+	"                                                                      ",
+	"                      ============================                    ", //30
+	"                          Press ESC to return                         "
 };
 
 //  ! Impresión de los jugadores en el ranking (IDEA)
@@ -539,25 +645,47 @@ int main() {
 		setCColor(color[1]);
 		for (int i = 0; i < 31; i++) {
 			for (int j = 0; j < 70; j++) {
-				if (i == 7) { setCColor(color[6]); }
+				if (i == 8) { setCColor(color[6]); }
 				if (error) {
-					if(i == 8) { setCColor(color[2]); }
+					if(i == 9) { setCColor(color[2]); }
 					printf("%c", menu[i][j]);
-					if (i == 10) { setCColor(color[6]); }
+					if (i == 11) { setCColor(color[6]); }
 				} else if(!error){
-					if(i == 9) { }
-					if(i != 8) { printf("%c", menu[i][j]); }
+					if(i == 10) { }
+					if(i != 9) { printf("%c", menu[i][j]); }
 				}
 			}
-			printf("\n\n");
+			printf("\n");
 		}
 		if (addScore) {
 			setCColor(color[1]);
 			tiempoTotal = double(tiempoFinal - tiempoInicial) / CLOCKS_PER_SEC;
-			printf("           Score: %d - Seconds: %.0lf - Insert your name: ", punts, tiempoTotal);
-			scanf("%s", username);
-			// Vainas para enchufar nombre + tiempo + score a XML
+			printf("\n");
+			printf("                  Score: %d - Seconds: %.0lf", punts, tiempoTotal);
+			if (punts > 1000) {
+				achievements[2] = '1';
+				achievements[1] = '1';
+			} else if (punts > 500 && punts < 1000) {
+				achievements[1] = '1';
+			} else if(punts == 0) {
+				achievements[0] = '1';
+			}
+			if (tiempoTotal > 60) {
+				achievements[4] = '1';
+				achievements[3] = '1';
+			} else if (tiempoTotal < 60 && tiempoTotal > 30) {
+				achievements[3] = '1';
+			}
+			achievements[5] = '\0';
+			achievements_xml = achievements;
+			stringScore = to_string(punts);
+			gotoxy(31,30);
+
+			//RUN CLIENT FUNCTION:
+			score_xml = runClient(stringScore, achievements_xml, beated);
+
 			addScore = false;
+			played = true;
 		}
 		gotoxy(0, 0);
 		chooseOption = _getch();
@@ -572,6 +700,7 @@ int main() {
 			system("cls"); // Limpia la pantalla una vez se ha escogido
 			vides = 3;
 			error = false;
+			punts = 0;
 			fantasma ghostA = inicialitzarFantasma(41, 14, 2);
 			fantasma ghostB = inicialitzarFantasma(43, 14, 3);
 			fantasma ghostC = inicialitzarFantasma(40, 14, 4);
@@ -609,13 +738,52 @@ int main() {
 
 		case '3':	// HIGHSCORES
 			error = false;
-
+			setCColor(color[1]);
+			do {
+				for (int i = 0; i < 32; i++) {
+					for (int j = 0; j < 71; j++) {
+						if (i == 8) { setCColor(color[6]); }
+						printf("%c", highscoresMenu[i][j]);
+					}
+					printf("\n");
+				}
+				gotoxy(35, 15);
+				printf("%d", punts);
+				gotoxy(37, 17);
+				if (played) {
+					printf("%s", score_xml);
+				} else if(!played){
+					setCColor(color[2]);
+					printf("You have to play first :)");
+					setCColor(color[1]);
+				}
+				
+			} while (chooseOption = _getch() && chooseOption == ESC);
 			system("cls");
 			break;
 
 		case '4': // ACHIEVEMENTS
 			error = false;
-
+			setCColor(color[1]);
+			do {
+				for (int i = 0; i < 32; i++) { //color[3] --> VERDE || color[2] --> ROJO
+					for (int j = 0; j < 71; j++) {
+						if (i == 11 && beated[0]) { setCColor(color[3]); }
+						if (i == 11 && !beated[0]) { setCColor(color[2]); }
+						if (i == 15 && beated[1]) { setCColor(color[3]); }
+						if (i == 15 && !beated[1]) { setCColor(color[2]); }
+						if (i == 19 && beated[2]) { setCColor(color[3]); }
+						if (i == 19 && !beated[2]) { setCColor(color[2]); }
+						if (i == 23 && beated[3]) { setCColor(color[3]); }
+						if (i == 23 && !beated[3]) { setCColor(color[2]); }
+						if (i == 27 && beated[4]) { setCColor(color[3]); }
+						if (i == 27 && !beated[4]) { setCColor(color[2]); }
+						if (i == 30) { setCColor(color[6]); }
+						printf("%c", achievementsMenu[i][j]);
+					}
+					printf("\n");
+				}
+			} while (chooseOption = _getch() && chooseOption == ESC);
 			system("cls");
 			break;
 
@@ -629,6 +797,5 @@ int main() {
 			break;
 		}
 	}
-	system("pause>NULL");
 	return 0;
 }
